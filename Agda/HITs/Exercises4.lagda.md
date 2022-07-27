@@ -5,6 +5,10 @@ open import new-prelude
 open import Lecture4-notes
 
 module Exercises4 where
+
+private variable
+  A : Type
+  x y w z : A
 ```
 
 # Constructing homotopies between paths
@@ -17,10 +21,11 @@ a path-between-paths-between-paths between the two!
 
 ```agda
 homotopy1 : (loop ∙ ! loop) ∙ loop ≡ loop
-homotopy1 = {!!}
+homotopy1 = ap (_∙ loop) (!-inv-r loop) ∙ ∙unit-l _
 
 homotopy2 : (loop ∙ ! loop) ∙ loop ≡ loop
-homotopy2 = {!!}
+homotopy2 = ! (∙assoc loop _ loop) ∙ ap (loop ∙_) (!-inv-l loop)
+
 ```
 
 (Harder exercise (🌶️): give a path between homotopy1 and
@@ -28,8 +33,22 @@ homotopy2! I'd recommend saving this until later though, because there
 is a trick to it that we haven't covered in lecture yet.)
 
 ```agda
+type-homotopy = ∀ {A : Type} {x : A} (p : x ≡ x) → (p ∙ ! p) ∙ p ≡ p
+
+homotopy1-p : type-homotopy
+homotopy1-p p = ap (_∙ p) (!-inv-r p) ∙ ∙unit-l _
+
+homotopy2-p : type-homotopy
+homotopy2-p p = ! (∙assoc p _ p) ∙ ap (p ∙_) (!-inv-l p)
+
+path-between-paths-between-paths-p : (p : x ≡ x) (h1 h2 : type-homotopy) → h1 p ≡ h2 p
+path-between-paths-between-paths-p p h1 h2 = {!!}
+
 path-between-paths-between-paths : homotopy1 ≡ homotopy2
-path-between-paths-between-paths = {!!}
+path-between-paths-between-paths = 
+  ap (_∙ loop) (!-inv-r loop) ∙ ∙unit-l _ ≡⟨ {!!} ⟩
+  ! (∙assoc loop _ loop) ∙ ap (loop ∙_) (!-inv-l loop) ∎
+
 ```
 
 # Functions are group homomorphism 
@@ -43,8 +62,16 @@ Use them to prove that the double function takes loop-inverse to
 loop-inverse concatenated with itself.
 
 ```agda
+ap-sym : {A B : Type} {f : A → B} {x y z : A} (p : x ≡ y)
+       → ap f (! p) ≡ ! (ap f p)
+ap-sym (refl _) = refl _
+
 double-!loop : ap double (! loop) ≡ ! loop ∙ ! loop
-double-!loop = {!!}
+double-!loop = 
+  ap double (! loop) ≡⟨ ap-sym {z = base} loop ⟩
+  ! (ap double loop) ≡⟨ ap ! calculate-double-loop ⟩
+  ! (loop ∙ loop) ≡⟨ !-inv-both loop loop ⟩
+  ! loop ∙ ! loop ∎
 ```
 
 (⋆) Define a function invert : S1 → S1 such that (ap invert) inverts a path
@@ -52,7 +79,7 @@ on the circle, i.e. sends the n-fold loop to the -n-fold loop.
 
 ```agda
 invert : S1 → S1
-invert = {!!}
+invert = S1-rec base (! loop)
 ```
 
 # Circles equivalence
@@ -65,14 +92,23 @@ is homotopic to the identity on base and loop:
 
 ```agda
 to-from-base : from (to base) ≡ base
-to-from-base = {!!}
+to-from-base = refll
 ```
 
 (⋆⋆⋆) 
 
 ```
 to-from-loop : ap from (ap to loop) ≡ loop
-to-from-loop = {!!}
+to-from-loop = 
+  ap from (ap to loop)
+    ≡⟨ ap (ap from) (S1-rec-loop north (east ∙ ! west)) ⟩
+  ap from (east ∙ ! west) ≡⟨ ap-∙ east _ ⟩
+  (let apc = ap from in apc east ∙ apc (! west)) ≡⟨
+    ap₂ _∙_ (Circle2-rec-east base base refll loop)
+      (ap-sym {z = north} west ∙ ap ! (Circle2-rec-west base base refll loop)) ⟩
+  loop ∙ refll ≡⟨ ∙unit-r _ ⟩
+  loop ∎
+
 ```
 
 Note: the problems below here are progressively more optional, so if you
@@ -93,14 +129,18 @@ paths in product types compose (⋆⋆⋆):
 compose-pair≡ : {A B : Type} {x1 x2 x3 : A} {y1 y2 y3 : B}
                 (p12 : x1 ≡ x2) (p23 : x2 ≡ x3)
                 (q12 : y1 ≡ y2) (q23 : y2 ≡ y3)
-              → ((pair≡ p12 q12) ∙ (pair≡ p23 q23)) ≡ {!!} [ (x1 , y1) ≡ (x3 , y3) [ A × B ] ]
-compose-pair≡ = {!!}
+              → ((pair≡ p12 q12) ∙ (pair≡ p23 q23)) ≡ pair≡ (p12 ∙ p23) (q12 ∙ q23)
+                [ (x1 , y1) ≡ (x3 , y3) [ A × B ] ]
+compose-pair≡ refll refll refll refll = refll
 ```
 
 (🌶️)
 ```
 torus-to-circles : Torus → S1 × S1
-torus-to-circles = {!!}
+torus-to-circles = T-rec (base , base) (pair≡ loop refll) (pair≡ refll loop)
+  (compose-pair≡ loop refll refll loop
+  ∙ ap₂ pair≡ (! (∙unit-l _)) (∙unit-l _)
+  ∙ ! (compose-pair≡ refll loop loop refll))
 ```
 
 # Suspensions (🌶️)
@@ -111,11 +151,11 @@ equivalence (functions back and forth), since we haven't seen how to
 prove that such functions are inverse yet.
 
 ```agda
-c2s : Circle2 → Susp {!!}
-c2s = {!!}
+c2s : Circle2 → Susp S1
+c2s = Circle2-rec northS southS (merid base) (merid base)
 
-s2c : Susp {!!} → Circle2
-s2c = {!!}
+s2c : Susp S1 → Circle2
+s2c = Susp-rec north south (S1-rec west refll)
 ```
 
 Suspension is a functor from types, which means that it acts on
@@ -123,7 +163,7 @@ functions as well as types.  Define the action of Susp on functions:
 
 ```agda
 susp-func : {X Y : Type} → (f : X → Y) → Susp X → Susp Y
-susp-func f = {!!} 
+susp-func f = Susp-rec northS southS (merid ∘ f)
 ```
 
 To really prove that Susp is a functor, we should check that this action
@@ -141,12 +181,12 @@ inverse yet.
 
 ```agda
 SuspFromPush : Type → Type
-SuspFromPush A = {!!}
+SuspFromPush A = Pushout A Unit Unit (λ _ → _) (λ _ → _)
 
 s2p : (A : Type) → Susp A → SuspFromPush A
-s2p A = {!!}
+s2p A = Susp-rec (inl _) (inr _) glue
 
 p2s : (A : Type) → SuspFromPush A → Susp A
-p2s A = {!!}
+p2s A = Push-rec (λ _ → northS) (λ _ → southS) merid
 ```
 

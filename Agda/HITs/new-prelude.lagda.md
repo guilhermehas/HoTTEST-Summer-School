@@ -13,13 +13,19 @@ module new-prelude where
 
 open import Agda.Primitive using (Level; lzero; lsuc; _⊔_) renaming (Set to Type) public
 
+private variable
+  ℓ : Level
+  A : Type ℓ
+  x y w z : A
+
 data _≡_ {l : Level} {A : Type l} : A → A → Type l where
  refl : (x : A) → x ≡ x
+pattern refll = refl _
 
 Path : {l : Level} (A : Type l) → A → A → Type l
 Path A x y = x ≡ y
 
-syntax Path A x y = x ≡ y [ A ] 
+syntax Path A x y = x ≡ y [ A ]
 
 infix 0 _≡_
 

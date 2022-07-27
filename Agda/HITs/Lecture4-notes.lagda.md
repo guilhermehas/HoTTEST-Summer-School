@@ -81,6 +81,9 @@ that path is the identity.  Let's state and prove them.
 
 !-inv-r : {A : Type} {x y : A} → (p : x ≡ y) → (p ∙ ! p) ≡ refl _
 !-inv-r (refl _) = refl _
+
+!-inv-both : {A : Type} {x y z : A} → (p : x ≡ y) (q : y ≡ z) → ! (p ∙ q) ≡ (! q ∙ ! p)
+!-inv-both refll refll = refll
 ```
 
 It's kind of amazing that all of this structure emerges from a very
@@ -151,6 +154,7 @@ Then, for example, we don't need to explicitly mention S1-rec-base to state the 
 postulate
   S1-rec-loop : {l : Level} {X : Type l} (x : X) (p : x ≡ x)
               → ap (S1-rec x p) loop ≡ p
+
 ```
 
 This is mainly for convenience, but it's a big convenience!  When we get
