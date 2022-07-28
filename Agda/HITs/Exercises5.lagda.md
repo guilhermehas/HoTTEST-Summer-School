@@ -3,6 +3,7 @@
 {-# OPTIONS --rewriting --without-K --allow-unsolved-metas #-}
 
 open import new-prelude
+open import Solutions4
 open import Lecture5-notes
 open import Solutions4 using (ap-!; to-from-base; to-from-loop; s2c; c2s; susp-func)
 
@@ -17,32 +18,56 @@ the identity.
 
 Prove that the round-trip on S1 is the identity (use to-from-base
 and to-from-loop from the Lecture 4 exercises), and package all of
-these items up as an equivalence S1 ≃ Circle2.  
+these items up as an equivalence S1 ≃ Circle2.
 
 ```agda
+from-to-loop : ap from (ap to loop) ≡ loop
+from-to-loop =
+  ap from (ap to loop) ≡⟨ ap (ap from) (S1-rec-loop _ _) ⟩
+  ap from (east ∙ ! west) ≡⟨ ap-∙ east (! west) ⟩
+  ap from east ∙ ap from (! west) ≡⟨ ap (ap from east ∙_) (ap-! _) ⟩
+  ap from east ∙ ! (ap from west)  ≡⟨ ap₂ (λ x y → x ∙ ! y)
+    (Circle2-rec-east _ _ _ _) (Circle2-rec-west _ _ _ _) ⟩
+  loop ∙ ! refll ≡⟨ ∙unit-r _ ⟩
+  loop ∎
+
 to-from : (x : S1) → from (to x) ≡ x
-to-from = {!!}
+to-from = S1-elim (λ x → from (to x) ≡ x) refll (
+  PathOver-roundtrip≡ from to loop (∙unit-l _ ∙ from-to-loop))
 
 circles-equivalent : S1 ≃ Circle2
-circles-equivalent = {!!}
+circles-equivalent = improve (Isomorphism to (Inverse from to-from from-to))
 ```
 
-# Reversing the circle (⋆⋆) 
+# Reversing the circle (⋆⋆)
 
 Define a map S1 → S1 that "reverses the orientation of the circle",
 i.e. sends loop to ! loop.
 
 ```agda
 rev : S1 → S1
-rev = {!!}
+rev = S1-rec base (! loop)
 ```
 
 Prove that rev is an equivalence.  Hint: you will need to state and prove
 one new generalized "path algebra" lemma and to use one of the lemmas from
-the "Functions are group homomorphism" section of Lecture 4's exercises.  
+the "Functions are group homomorphism" section of Lecture 4's exercises.
 ```agda
+rev-rev-loop : refll ∙ ap rev (ap rev loop) ≡ loop
+rev-rev-loop =
+  refll ∙ ap rev (ap rev loop) ≡⟨ ∙unit-l _ ⟩
+  ap rev (ap rev loop) ≡⟨ ap (ap rev) (S1-rec-loop _ _) ⟩
+  ap rev (! loop) ≡⟨ ap-! _ ⟩
+  ! (ap rev loop) ≡⟨ ap ! (S1-rec-loop _ _) ⟩
+  ! (! loop) ≡⟨ !-! _ ⟩
+  loop ∎
+
+rev-rev~id : rev ∘ rev ∼ id
+rev-rev~id = S1-elim (λ x → rev (rev x) ≡ x) refll
+  (PathOver-roundtrip≡  rev rev loop rev-rev-loop)
+
 rev-equiv : is-equiv rev
-rev-equiv = {!!}
+rev-equiv = Inverse rev rev-rev~id rev rev-rev~id
 ```
 
 
@@ -51,11 +76,11 @@ rev-equiv = {!!}
 In the Lecture 4 exercises, you defined a map from the Torus to S1 × S1.
 In this problem, you will define a converse map.  The goal is for these
 two maps to be part of an equivalence, but we won't prove that in these
-exercises.  
+exercises.
 
 You will need to state and prove a lemma characterizing a path over a
 path in a path fibration.  Then, to define the map S1 × S1 → Torus, you
-will want to curry it and use S1-rec and/or S1-elim on each circle.  
+will want to curry it and use S1-rec and/or S1-elim on each circle.
 
 ```agda
 PathOver-path≡ : ∀ {A B : Type} {g : A → B} {f : A → B}
@@ -63,7 +88,7 @@ PathOver-path≡ : ∀ {A B : Type} {g : A → B} {f : A → B}
                           {q : (f a) ≡ (g a)}
                           {r : (f a') ≡ (g a')}
                         → {!!}
-                        → q ≡ r [ (\ x → (f x) ≡ (g x)) ↓ p ]
+                        → q ≡ r [ (λ x → (f x) ≡ (g x)) ↓ p ]
 PathOver-path≡ {A}{B}{g}{f}{a}{a'}{p}{q}{r} h = {!!}
 
 circles-to-torus : S1 → (S1 → Torus)
@@ -80,7 +105,7 @@ only the circle, whereas the following sections are a bit easier code
 but require understanding the suspension type, which we haven't talked
 about too much yet.**
 
-# H space 
+# H space
 
 The multiplication operation on the circle discussed in lecture is part
 of what is called an "H space" structure on the circle.  One part of
@@ -109,7 +134,7 @@ equivalence between paths in S1 × A and pairs of paths discussed in
 Lecture 3, we can then "apply" (the uncurried version of) f to a pair of
 paths (p : x ≡ y [ S1 ] , q : z ≡ w [ A ]) to get a path (f x z ≡ f y w
 [ B ]).  In the special case where q is reflexivity on a, this
-application to p and q can be simplified to ap (\ x → f x a) p : f x a ≡
+application to p and q can be simplified to ap (λ x → f x a) p : f x a ≡
 f y a [ B ].
 
 Now, suppose that f is defined by circle recursion.  We would expect
@@ -119,10 +144,10 @@ In the case where q is reflexivity, applying f to the pair (loop , refl)
 can reduce like this:
 ```agda
 S1-rec-loop-1 : ∀ {A B : Type} {f : A → B} {h : f ≡ f} {a : A}
-                     →  ap (\ x → S1-rec f h x a) loop ≡ app≡ h a
+                     →  ap (λ x → S1-rec f h x a) loop ≡ app≡ h a
 S1-rec-loop-1 {A}{B}{f}{h}{a} = {!!}
 ```
-Prove this reduction using ap-∘ and the reduction rule for S1-rec on the loop.  
+Prove this reduction using ap-∘ and the reduction rule for S1-rec on the loop.
 
 (⋆⋆⋆) Show that base is a right unit for multiplication.  You will need
 a slightly different path-over lemma than before.
@@ -133,8 +158,8 @@ PathOver-endo≡ : ∀ {A : Type} {f : A → A}
                  {q : (f a) ≡ a}
                  {r : (f a') ≡ a'}
                → {!!}
-               → q ≡ r [ (\ x → f x ≡ x) ↓ p ]
-PathOver-endo≡ {p = (refl _)} {q = q} {r} h = {!!}
+               → q ≡ r [ (λ x → f x ≡ x) ↓ p ]
+PathOver-endo≡ {p = refll} {q = q} {r} h = {!!}
 
 mult-unit-r : (x : S1) → mult x base ≡ x
 mult-unit-r = {!!}
@@ -143,7 +168,7 @@ mult-unit-r = {!!}
 # Suspensions and the 2-point circle
 
 (⋆) Postulate the computation rules for the non-dependent susp-rec and
-declare rewrites for the reduction rules on the point constructors.  
+declare rewrites for the reduction rules on the point constructors.
 ```agda
 postulate
   Susp-rec-north : {l : Level} {A : Type} {X : Type l}
@@ -163,7 +188,7 @@ postulate
 (⋆) Postulate the dependent elimination rule for suspensions:
 
 ```agda
-postulate 
+postulate
   Susp-elim : {l : Level} {A : Type} (P : Susp A → Type l)
             → (n : {!!})
             → (s : {!!})
@@ -202,6 +227,3 @@ susp-func-∘ : ∀ {X Y Z : Type} (f : X → Y) (g : Y → Z)
             → susp-func {X} (g ∘ f) ∼ susp-func g ∘ susp-func f
 susp-func-∘ f g = {!!}
 ```
-
-
-

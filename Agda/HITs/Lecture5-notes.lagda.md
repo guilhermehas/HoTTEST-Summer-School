@@ -109,16 +109,16 @@ transport-to-pathover : {l1 l2 : Level} {A : Type l1} (B : A → Type l2)
                         {a1 a2 : A} (p : a1 ≡ a2)
                         (b1 : B a1) (b2 : B a2)
                      → (transport B p b1 ≡ b2) ≃ (b1 ≡ b2 [ B ↓ p ]) 
-transport-to-pathover B (refl _) b1 b2 = improve (Isomorphism ((λ { (refl _) → reflo }))
-                                                       (Inverse (\ { reflo → refl _})
-                                                                (\ {(refl _) → refl _})
-                                                                (\ {(reflo) → refl _})))
+transport-to-pathover B refll b1 b2 = improve (Isomorphism ((λ {refll → reflo }))
+                                                       (Inverse (λ {reflo → refll})
+                                                                (λ {refll → refll})
+                                                                (λ {reflo → refll})))
 
 path-to-pathover : ∀ {A : Type} {B : A → Type}
                  → {a : A} {x y : B a}
                  → (p : x ≡ y)
                  → x ≡ y [ B ↓ refl a ]
-path-to-pathover p = fwd (transport-to-pathover _ (refl _) _ _) p
+path-to-pathover p = fwd (transport-to-pathover _ refll _ _) p
 ```
 
 ap of a dependent function naturally creates a path-over:
@@ -126,7 +126,7 @@ ap of a dependent function naturally creates a path-over:
 apd : {l1 l2 : Level} {A : Type l1} {B : A → Type l2}
       (f : (x : A) → B x) {a1 a2 : A} (p : a1 ≡ a2)
     → f a1 ≡ f a2 [ B ↓ p ]
-apd f (refl _) = reflo
+apd f refll = reflo
 ```
 
 We'll use the inductive family definition mainly because it will be
@@ -184,15 +184,15 @@ module RememberTheseFromLastTime where
   from-to-south = west
   
   from-to-west : ap to (ap from west) ∙ from-to-south ≡ west
-  from-to-west = ap to (ap from west) ∙ west ≡⟨ ap (\ H → ap to H ∙ west) (Circle2-rec-west _ _ _ _) ⟩
+  from-to-west = ap to (ap from west) ∙ west ≡⟨ ap (λ H → ap to H ∙ west) (Circle2-rec-west _ _ _ _) ⟩
                   ap to (refl base) ∙ west    ≡⟨ ∙unit-l west ⟩
                   west ∎ 
   
   from-to-east : ap to (ap from east) ∙ from-to-south ≡ east
-  from-to-east = ap to (ap from east) ∙ west ≡⟨ ap (\ H → ap to H ∙ west) (Circle2-rec-east _ _ _ _) ⟩
-                 ap to loop ∙ west           ≡⟨ ap (\ H → H ∙ west) (S1-rec-loop _ _) ⟩
+  from-to-east = ap to (ap from east) ∙ west ≡⟨ ap (λ H → ap to H ∙ west) (Circle2-rec-east _ _ _ _) ⟩
+                 ap to loop ∙ west           ≡⟨ ap (λ H → H ∙ west) (S1-rec-loop _ _) ⟩
                  east ∙ ! west ∙ west        ≡⟨ ! (∙assoc _ (! west) west) ⟩
-                 east ∙ (! west ∙ west)      ≡⟨ ap (\ H → east ∙ H) (!-inv-l west) ⟩
+                 east ∙ (! west ∙ west)      ≡⟨ ap (λ H → east ∙ H) (!-inv-l west) ⟩
                  east ∎
 open RememberTheseFromLastTime public
 ```
@@ -203,11 +203,11 @@ PathOver-roundtrip≡ : ∀ {A B : Type} (g : B → A) (f : A → B)
                         {q : g (f a) ≡ a}
                         {r : g (f a') ≡ a'}
                       → ! q ∙ ((ap g (ap f p)) ∙ r) ≡ p
-                      → q ≡ r [ (\ x → g (f x) ≡ x) ↓ p ]
-PathOver-roundtrip≡ g f  (refl _) {q = q} {r} h =
-  path-to-pathover (ap (\ H → q ∙ H) (! h) ∙
+                      → q ≡ r [ (λ x → g (f x) ≡ x) ↓ p ]
+PathOver-roundtrip≡ g f  refll {q = q} {r} h =
+  path-to-pathover (ap (λ H → q ∙ H) (! h) ∙
                     ( ∙assoc _ _ (refl _ ∙ r) ∙
-                    (ap (\ H → H ∙ (refl _ ∙ r)) (!-inv-r q) ∙
+                    (ap (λ H → H ∙ (refl _ ∙ r)) (!-inv-r q) ∙
                     (∙unit-l (refl _ ∙ r) ∙  ∙unit-l r )) ))
 
 from-to : (y : Circle2) → to (from y) ≡ y
@@ -254,11 +254,11 @@ PathOver-path-loop : ∀ {A : Type}
                      {q : a ≡ a}
                      {r : a' ≡ a'}
                    → q ∙ p ≡ p ∙ r
-                   → q ≡ r [ (\ x → x ≡ x) ↓ p ]
-PathOver-path-loop {p = (refl _)} h = path-to-pathover (h ∙ (∙unit-l _)) 
+                   → q ≡ r [ (λ x → x ≡ x) ↓ p ]
+PathOver-path-loop {p = refll} h = path-to-pathover (h ∙ (∙unit-l _))
 
 mult : S1 → S1 → S1
-mult = S1-rec ((\ x → x)) (λ≡ (S1-elim _ loop (PathOver-path-loop (refl _))))
+mult = S1-rec (λ x → x) (λ≡ (S1-elim _ loop (PathOver-path-loop refll)))
 ```
 
 
@@ -271,7 +271,7 @@ induction is an equivalence.
 
 ```agda
 app≡ : {l1 l2 : Level} {A : Type l1} {B : A → Type l2} {f g : (x : A) → B x} → f ≡ g → f ∼ g
-app≡ p x = ap (\ f → f x) p 
+app≡ p x = ap (λ f → f x) p
 
 postulate
   λ≡βinv : {l1 l2 : Level} {A : Type l1} {B : A → Type l2} {f g : (x : A) → B x} → (h : f ∼ g) 
@@ -316,7 +316,7 @@ loops-between-refls, etc.  E.g.
 Ω¹S1 = base ≡ base
 
 Ω²S1 : Type
-Ω²S1 = refl base ≡ refl base [ base ≡ base ] 
+Ω²S1 = refl base ≡ refl base [ Ω¹S1 ]
 ```
 
 "Calculating a loops space (or homotopy group)" means proving an
@@ -343,19 +343,19 @@ another bit of the univalence axiom:
 
 ```agda
   postulate
-    uaβ : ∀{l : Level} {X Y : Type l} (e : X ≃ Y) {x : X} → transport (\ X → X) (ua e) x ≡ fwd e x
+    uaβ : ∀{l : Level} {X Y : Type l} (e : X ≃ Y) {x : X} → transport (λ X → X) (ua e) x ≡ fwd e x
 ```
 
 Then we can calculate
 
 ```agda
   transport-ap-assoc : {A : Type} (C : A → Type) {a a' : A} (p : a ≡ a') {x : C a}
-                       → transport C p x ≡ transport (\ X → X) (ap C p) x
-  transport-ap-assoc C (refl _) = refl _
+                       → transport C p x ≡ transport (λ X → X) (ap C p) x
+  transport-ap-assoc C refll = refl _
 
   transport-Cover-loop : (x : ℤ) → transport Cover loop x ≡ fwd succℤ x
   transport-Cover-loop x = transport-ap-assoc Cover loop ∙
-                           ap (\ H → transport id H x) (S1-rec-loop _ _) ∙
+                           ap (λ H → transport id H x) (S1-rec-loop _ _) ∙
                            (uaβ  succℤ)
 
   PathOver-Cover-loop : (x : ℤ) → x ≡ fwd succℤ x [ Cover ↓ loop ]

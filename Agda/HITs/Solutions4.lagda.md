@@ -18,13 +18,13 @@ that we haven't really prepared for: prove this!)
 
 ```agda
 homotopy1 : (loop ∙ ! loop) ∙ loop ≡ loop
-homotopy1 = (loop ∙ ! loop) ∙ loop ≡⟨ ap ( \ H → H ∙ loop) (!-inv-r loop) ⟩
+homotopy1 = (loop ∙ ! loop) ∙ loop ≡⟨ ap ( λ H → H ∙ loop) (!-inv-r loop) ⟩
             refl _ ∙ loop ≡⟨ ∙unit-l loop ⟩
             loop ∎ 
 
 homotopy2 : (loop ∙ ! loop) ∙ loop ≡ loop
 homotopy2 = (loop ∙ ! loop) ∙ loop ≡⟨ ! (∙assoc loop (! loop) loop) ⟩
-            loop ∙ (! loop ∙ loop) ≡⟨ ap (\ H → loop ∙ H) (!-inv-l loop) ⟩
+            loop ∙ (! loop ∙ loop) ≡⟨ ap (λ H → loop ∙ H) (!-inv-l loop) ⟩
             loop ∎
 ```
 
@@ -41,9 +41,9 @@ these path algebra steps.
 path-between-paths-between-paths : homotopy1 ≡ homotopy2
 path-between-paths-between-paths = gen loop where
   gen : ∀ {A : Type} {x y : A} (p : x ≡ y)
-      →  (ap ( \ H → H ∙ p) (!-inv-r p) ∙ ∙unit-l p)
+      →  (ap ( λ H → H ∙ p) (!-inv-r p) ∙ ∙unit-l p)
          ≡  
-         (! (∙assoc p (! p) p) ∙  ap (\ H → p ∙ H) (!-inv-l p))
+         (! (∙assoc p (! p) p) ∙  ap (λ H → p ∙ H) (!-inv-l p))
          [ ((p ∙ ! p) ∙ p) ≡ p [ x ≡ y [ A ] ] ]
   gen (refl _) = refl _
 
@@ -141,7 +141,7 @@ c2s : Circle2 → Susp Bool
 c2s = Circle2-rec northS southS (merid true) (merid false)
 
 s2c : Susp Bool → Circle2
-s2c = Susp-rec north south (\ { true → west ; false →  east })
+s2c = Susp-rec north south (λ { true → west ; false →  east })
 ```
 
 Suspension is a functor from types, which means that it acts on
@@ -149,7 +149,7 @@ functions as well as types.  Define the action of Susp on functions:
 
 ```agda
 susp-func : {X Y : Type} → (f : X → Y) → Susp X → Susp Y
-susp-func f = Susp-rec northS southS (\ x → merid (f x) )
+susp-func f = Susp-rec northS southS (λ x → merid (f x) )
 ```
 
 To really prove that Susp is a functor, we should check that this action
@@ -168,12 +168,12 @@ inverse yet.
 
 ```agda
 SuspFromPush : Type → Type
-SuspFromPush A = Pushout A 𝟙 𝟙  (\ _ → ⋆) (\ _ → ⋆)
+SuspFromPush A = Pushout A 𝟙 𝟙  (λ _ → ⋆) (λ _ → ⋆)
 
 s2p : (A : Type) → Susp A → SuspFromPush A
 s2p A = Susp-rec (inl ⋆) (inr ⋆) glue
 
 p2s : (A : Type) → SuspFromPush A → Susp A
-p2s A = Push-rec (\ _ → northS) (\ _ → southS) merid
+p2s A = Push-rec (λ _ → northS) (λ _ → southS) merid
 ```
 

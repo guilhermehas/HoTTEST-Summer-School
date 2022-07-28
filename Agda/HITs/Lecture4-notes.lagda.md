@@ -82,6 +82,9 @@ that path is the identity.  Let's state and prove them.
 !-inv-r : {A : Type} {x y : A} → (p : x ≡ y) → (p ∙ ! p) ≡ refl _
 !-inv-r (refl _) = refl _
 
+!-! : {A : Type} {x y : A} → (p : x ≡ y) → ! (! p) ≡ p
+!-! refll = refll
+
 !-inv-both : {A : Type} {x y z : A} → (p : x ≡ y) (q : y ≡ z) → ! (p ∙ q) ≡ (! q ∙ ! p)
 !-inv-both refll refll = refll
 ```
@@ -95,16 +98,16 @@ above and loop:
 ```agda
 example : (loop ∙ ! loop ∙ loop ∙ ! loop  ∙ loop) ≡ loop [ base ≡ base ]
 example = loop ∙ ! loop ∙ loop ∙ ! loop  ∙ loop  ≡⟨ refl _ ⟩
-          (((loop ∙ ! loop) ∙ loop) ∙ ! loop)  ∙ loop  ≡⟨ ap (\ H → H ∙ loop ∙ ! loop ∙ loop) (!-inv-r loop)  ⟩
-          refl _ ∙ loop ∙ ! loop ∙ loop                ≡⟨  ap (\ H → H ∙ ! loop ∙ loop) (∙unit-l (loop))  ⟩
+          (((loop ∙ ! loop) ∙ loop) ∙ ! loop)  ∙ loop  ≡⟨ ap (λ H → H ∙ loop ∙ ! loop ∙ loop) (!-inv-r loop)  ⟩
+          refl _ ∙ loop ∙ ! loop ∙ loop                ≡⟨  ap (λ H → H ∙ ! loop ∙ loop) (∙unit-l (loop))  ⟩
           loop ∙ ! loop ∙ loop                         ≡⟨  ! (∙assoc _ (! loop) loop)  ⟩
-          loop ∙ (! loop ∙ loop)                       ≡⟨  ap (\ H → loop ∙ H) (!-inv-l loop)  ⟩
+          loop ∙ (! loop ∙ loop)                       ≡⟨  ap (λ H → loop ∙ H) (!-inv-l loop)  ⟩
           loop ∙ (refl _)                              ≡⟨ refl _ ⟩ 
           loop ∎  
 ```
 
 We'll use the notation x ≡ y [ A ] if we want to make the type a path is
-in explicit.  We'll sometimes write (\ x → e) for (λ x → e) because it
+in explicit.  We'll sometimes write (λ x → e) for (λ x → e) because it
 easier to type and de-emphasizes the function a little (since ap almost
 always needs a lambda abstraction as input, it would IMO be nicer to have
 a syntax with a bound variable like ap (H → ...) p).  
@@ -188,7 +191,7 @@ ap-∙ (refl _) (refl _) = refl _
 calculate-double-2-loops : ap double (loop ∙ loop) ≡ loop ∙ loop ∙ loop ∙ loop
 calculate-double-2-loops = 
   ap double (loop ∙ loop) ≡⟨ ap-∙ loop loop ⟩
-  ap double loop ∙ ap double loop ≡⟨ ap₂ (\ p q → p ∙ q) (S1-rec-loop _ _) (S1-rec-loop _ _)  ⟩
+  ap double loop ∙ ap double loop ≡⟨ ap₂ (λ p q → p ∙ q) (S1-rec-loop _ _) (S1-rec-loop _ _)  ⟩
   (loop ∙ loop) ∙ (loop ∙ loop) ≡⟨  (∙assoc (loop ∙ loop) loop loop )  ⟩
   ((loop ∙ loop) ∙ loop) ∙ loop ∎
 ```
@@ -252,15 +255,15 @@ from-to-south : to (from south) ≡ south
 from-to-south = west
 
 from-to-west : ap to (ap from west) ∙ from-to-south ≡ west
-from-to-west = ap to (ap from west) ∙ west ≡⟨ ap (\ H → ap to H ∙ west) (Circle2-rec-west _ _ _ _) ⟩
+from-to-west = ap to (ap from west) ∙ west ≡⟨ ap (λ H → ap to H ∙ west) (Circle2-rec-west _ _ _ _) ⟩
                ap to (refl base) ∙ west    ≡⟨ ∙unit-l west ⟩
                west ∎ 
 
 from-to-east : ap to (ap from east) ∙ from-to-south ≡ east
-from-to-east = ap to (ap from east) ∙ west ≡⟨ ap (\ H → ap to H ∙ west) (Circle2-rec-east _ _ _ _) ⟩
-               ap to loop ∙ west           ≡⟨ ap (\ H → H ∙ west) (S1-rec-loop _ _) ⟩
+from-to-east = ap to (ap from east) ∙ west ≡⟨ ap (λ H → ap to H ∙ west) (Circle2-rec-east _ _ _ _) ⟩
+               ap to loop ∙ west           ≡⟨ ap (λ H → H ∙ west) (S1-rec-loop _ _) ⟩
                east ∙ ! west ∙ west        ≡⟨ ! (∙assoc _ (! west) west) ⟩
-               east ∙ (! west ∙ west)      ≡⟨ ap (\ H → east ∙ H) (!-inv-l west) ⟩
+               east ∙ (! west ∙ west)      ≡⟨ ap (λ H → east ∙ H) (!-inv-l west) ⟩
                east ∎
 ```
 
