@@ -85,14 +85,29 @@ will want to curry it and use S1-rec and/or S1-elim on each circle.
 ```agda
 PathOver-path≡ : ∀ {A B : Type} {g : A → B} {f : A → B}
                           {a a' : A} {p : a ≡ a'}
-                          {q : (f a) ≡ (g a)}
-                          {r : (f a') ≡ (g a')}
-                        → {!!}
+                          {q : f a ≡ g a}
+                          {r : f a' ≡ g a'}
+                        → ! q ∙ ap f p ∙ r ≡ ap g p
                         → q ≡ r [ (λ x → (f x) ≡ (g x)) ↓ p ]
-PathOver-path≡ {A}{B}{g}{f}{a}{a'}{p}{q}{r} h = {!!}
+PathOver-path≡ {A}{B}{g}{f}{a}{a'}{refll}{q}{r} h =
+  path-to-pathover (
+    q ≡⟨ ap (q ∙_) (! h) ⟩
+    q ∙ (! q ∙ r) ≡⟨ ∙assoc _ _ r ⟩
+    (q ∙ ! q) ∙ r ≡⟨ ap (_∙ r) (!-inv-r q) ⟩
+    refll ∙ r ≡⟨ ∙unit-l _ ⟩
+    r ∎
+  )
 
 circles-to-torus : S1 → (S1 → Torus)
-circles-to-torus = {!!}
+circles-to-torus = S1-rec (S1-rec baseT pT) (λ≡ (S1-elim _ qT (PathOver-path≡ (
+  ! qT ∙ ap (S1-rec baseT pT) loop ∙ qT ≡⟨ ap (λ H → ! qT ∙ H ∙ qT) (S1-rec-loop _ _) ⟩
+  ! qT ∙ pT ∙ qT ≡⟨ ! (∙assoc _ _ qT)  ⟩
+  ! qT ∙ (pT ∙ qT) ≡⟨ ap (! qT ∙_) sT ⟩
+  ! qT ∙ (qT ∙ pT) ≡⟨ ∙assoc _ _ pT ⟩
+  (! qT ∙ qT) ∙ pT ≡⟨ ap (_∙ pT) (!-inv-l qT) ⟩
+  refll ∙ pT ≡⟨ ∙unit-l _ ⟩
+  pT ≡⟨ ! (S1-rec-loop _ _) ⟩
+  ap (S1-rec baseT pT) loop ∎))))
 
 circles-to-torus' : S1 × S1 → Torus
 circles-to-torus' (x , y) = circles-to-torus x y
