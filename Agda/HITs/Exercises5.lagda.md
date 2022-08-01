@@ -282,12 +282,12 @@ susp-func-id = Susp-elim _ refll refll λ x → PathOver-endo≡ (
 
 susp-func-∘ : ∀ {X Y Z : Type} (f : X → Y) (g : Y → Z)
             → susp-func {X} (g ∘ f) ∼ susp-func g ∘ susp-func f
-susp-func-∘ f g = Susp-elim _ refll refll λ x →
-  fwd (transport-to-pathover _ (merid x) {!!} {!!}) (helper x)
-  where
-  helper' : ∀ p → transport _ p refll ≡ refll
-  helper' p = {!!}
-
-  helper : ∀ x → transport _ (merid x) refll ≡ refll
-  helper x = helper' (merid x)
-```
+susp-func-∘ f g =
+  -- let sns = Susp-rec northS southS in
+  Susp-elim _ refll refll λ x → PathOver-path≡ (
+    refll ∙ ap (susp-func (g ∘ f)) (merid x) ≡⟨ ∙unit-l _ ⟩
+    ap (susp-func (g ∘ f)) (merid x)   ≡⟨ Susp-rec-merid _ _ _ _ ⟩
+    merid (g (f x)) ≡⟨ ! (Susp-rec-merid _ _ _ _) ⟩
+    ap (susp-func g) (merid (f x))  ≡⟨ ap (ap (susp-func g)) (! (Susp-rec-merid _ _ _ _)) ⟩
+    ap (susp-func g) (ap (susp-func f) (merid x)) ≡⟨ ! (ap-∘ (susp-func f) (susp-func g) (merid x)) ⟩
+    ap (susp-func g ∘ susp-func f) (merid x) ∎)
