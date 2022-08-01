@@ -361,9 +361,8 @@ Then we can calculate
   transport-Cover-loop : (x : ℤ) → transport Cover loop x ≡ fwd succℤ x
   transport-Cover-loop x = transport-ap-assoc Cover loop ∙
                            ap (λ H → transport id H x) (S1-rec-loop _ _) ∙
-                           (uaβ  succℤ)
+                           uaβ  succℤ
 
   PathOver-Cover-loop : (x : ℤ) → x ≡ fwd succℤ x [ Cover ↓ loop ]
   PathOver-Cover-loop x = fwd (transport-to-pathover _ _ _ _) (transport-Cover-loop x)
 ```
-=======
