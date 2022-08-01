@@ -220,7 +220,7 @@ from-to = Circle2-elim _
 
 To do the other direction you'll need 
 
-```
+```agda
 postulate
   S1-elim : (X : S1 → Type)
             (x : X base)
@@ -258,9 +258,15 @@ PathOver-path-loop : ∀ {A : Type}
 PathOver-path-loop {p = refll} h = path-to-pathover (h ∙ (∙unit-l _))
 
 mult : S1 → S1 → S1
-mult = S1-rec (λ x → x) (λ≡ (S1-elim _ loop (PathOver-path-loop refll)))
+mult = S1-rec ((\ y → y)) (λ≡ (S1-elim (λ z → z ≡ z) loop (PathOver-path-loop (refl _))))
 ```
 
+Note that it is also possible to do this without funext by binding the
+second input before doing the S1-rec on the first input (thanks Ulrik!):
+```agda
+mult-nofunext : S1 → S1 → S1
+mult-nofunext x y = S1-rec y (S1-elim (λ z → z ≡ z) loop (PathOver-path-loop (refl _)) y) x
+```
 
 Above, we used the main part of function extensionality: a homotopy
 induces a path between functions.  The full form of the function
@@ -290,7 +296,6 @@ full-funext = Inverse λ≡' λ≡η λ≡ λ≡βinv where
     λ≡η : _
 ```
 
-(If there is time.)
 
 # Univalence and the universal cover of the circle
 
@@ -361,3 +366,4 @@ Then we can calculate
   PathOver-Cover-loop : (x : ℤ) → x ≡ fwd succℤ x [ Cover ↓ loop ]
   PathOver-Cover-loop x = fwd (transport-to-pathover _ _ _ _) (transport-Cover-loop x)
 ```
+=======
