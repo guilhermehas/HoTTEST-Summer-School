@@ -283,7 +283,6 @@ susp-func-id = Susp-elim _ refll refll λ x → PathOver-endo≡ (
 susp-func-∘ : ∀ {X Y Z : Type} (f : X → Y) (g : Y → Z)
             → susp-func {X} (g ∘ f) ∼ susp-func g ∘ susp-func f
 susp-func-∘ f g =
-  -- let sns = Susp-rec northS southS in
   Susp-elim _ refll refll λ x → PathOver-path≡ (
     refll ∙ ap (susp-func (g ∘ f)) (merid x) ≡⟨ ∙unit-l _ ⟩
     ap (susp-func (g ∘ f)) (merid x)   ≡⟨ Susp-rec-merid _ _ _ _ ⟩
