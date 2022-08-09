@@ -335,7 +335,7 @@ can be pictured as a helix.  But in type theory we just define it by
 saying what the fibers are and what happens when you go around the loop.
 
 ```agda
-module AssumeInts (ℤ : Type)
+module AssumeInts2 (ℤ : Type)
                   (0ℤ : ℤ)
                   (succℤ : ℤ ≃ ℤ) where
 

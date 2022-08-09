@@ -5,7 +5,7 @@
 open import new-prelude
 
 open import Lecture4-notes
-open import Lecture5-notes
+open import Lecture5-notes hiding (ua; Ω¹S1; Ω²S1)
 open import Solutions5-dan using (PathOver-path≡)
 
 module Lecture6-notes where
@@ -32,27 +32,27 @@ return the identity equivalence X ≃ X.  Call this path-to-equiv:
 
 ```agda
 id≃ : ∀ {A : Type} → A ≃ A
-id≃ = Equivalence ((\ x → x)) (Inverse (\ x → x) (\ _ → refl _) (\ x → x) (\ _ → refl _))
+id≃ = Equivalence ((λ x → x)) (Inverse (λ x → x) (λ _ → refl _) (λ x → x) (λ _ → refl _))
 
 path-to-equiv : ∀ {A B : Type} → A ≡ B → A ≃ B
 path-to-equiv (refl _) = id≃
 ```
 
-Note that fwd (path-to-equiv p) is equal to transport (\ X → X) p):
+Note that fwd (path-to-equiv p) is equal to transport (λ X → X) p):
 ```agda 
-fwd-path-to-equiv : ∀ {A B : Type} (p : A ≡ B) → fwd (path-to-equiv p) ≡ transport (\ X → X) p 
+fwd-path-to-equiv : ∀ {A B : Type} (p : A ≡ B) → fwd (path-to-equiv p) ≡ transport (λ X → X) p
 fwd-path-to-equiv (refl _) = refl _
 ```
 
 In full, the univalence axiom says that this map path-to-equiv is an
 equivalence between equivalences and paths.  For our purposes today, we
 will only need one more bit of that equivalence, which says that
-transport (\ X → X) after ua is the identity:
+transport (λ X → X) after ua is the identity:
 
 ```agda
 postulate
   uaβ : ∀{l : Level} {X Y : Type l} (e : X ≃ Y) {x : X}
-      → transport (\ X → X) (ua e) x ≡ fwd e x
+      → transport (λ X → X) (ua e) x ≡ fwd e x
 ```
 (This extra bit actually turns out to imply the full univalence axiom,
 using the fact that is-equiv is a proposition, and the fundamental
@@ -67,7 +67,7 @@ code to work, since they don't actually depend on those assumptions.
 
 ```agda
 transport-ap-assoc : {A : Type} (C : A → Type) {a a' : A} (p : a ≡ a') {x : C a}
-                       → transport C p x ≡ transport (\ X → X) (ap C p) x
+                       → transport C p x ≡ transport (λ X → X) (ap C p) x
 transport-ap-assoc C (refl _) = refl _
 
 transport-→ : {X : Type}
@@ -75,7 +75,7 @@ transport-→ : {X : Type}
               {B : X → Type}
               {x x' : X} (p : x ≡ x')
               {f : A x → B x}
-            → transport (λ z → (y : A z) → B (z)) p f ≡ \ a → transport B p (f (transport A (! p) a))
+            → transport (λ z → (y : A z) → B (z)) p f ≡ λ a → transport B p (f (transport A (! p) a))
 transport-→ (refl _) = refl _
 
 transport-inv-r : {X : Type}
@@ -91,10 +91,10 @@ PathOver-→ : {X : Type}
              {f1 : A x → B x}
              {f2 : A x' → B x'}
            → ((a : A x) → f1 a ≡ f2 (transport A p a) [ B ↓ p ])
-           → f1 ≡ f2 [ (\ z → A z → B z) ↓ p ]
+           → f1 ≡ f2 [ (λ z → A z → B z) ↓ p ]
 PathOver-→ {A = A} {B} {p = p} {f2 = f2} h =
   fwd (transport-to-pathover _ _ _ _)
-    (transport-→ p ∙ λ≡ \ a → bwd (transport-to-pathover _ _ _ _)
+    (transport-→ p ∙ λ≡ λ a → bwd (transport-to-pathover _ _ _ _)
        (h (transport A (! p) a)) ∙  ap f2 (transport-inv-r p a))
 
 pair≡d : {l1 l2 : Level} {A : Type l1} {B : A → Type l2}
@@ -114,7 +114,7 @@ transport-Π : {X : Type}
               {B : Σ A → Type}
               {x x' : X} (p : x ≡ x')
               {f : (y : A x) → B (x , y)}
-            → transport (λ z → (y : A z) → B (z , y)) p f ≡ \ a → transport B (pair≡d p (fill-left p a)) (f (transport A (! p) a))
+            → transport (λ z → (y : A z) → B (z , y)) p f ≡ λ a → transport B (pair≡d p (fill-left p a)) (f (transport A (! p) a))
 transport-Π (refl _) = refl _
 
 PathOver-Π : {X : Type}
@@ -124,10 +124,10 @@ PathOver-Π : {X : Type}
              {f1 : (y : A x) → B (x , y)}
              {f2 : (y' : A x') → B (x' , y')}
            → ({a : A x} {a' : A x'} (q : a ≡ a' [ A ↓ p ]) → f1 a ≡ f2 a' [ B ↓ pair≡d p q ])
-           → f1 ≡ f2 [ (\ z → (y : A z) → B (z , y)) ↓ p ]
+           → f1 ≡ f2 [ (λ z → (y : A z) → B (z , y)) ↓ p ]
 PathOver-Π {A = A} {B} {p = p} {f1 = f1} {f2} h =
   fwd (transport-to-pathover _ _ _ _)
-      ((transport-Π p) ∙ λ≡  \ a → 
+      ((transport-Π p) ∙ λ≡  λ a →
        bwd (transport-to-pathover B (pair≡d p (fill-left p a)) _ _) (h _))
 
 PathOver-path-to : ∀ {A : Type} 
@@ -135,7 +135,7 @@ PathOver-path-to : ∀ {A : Type}
                        {q : a0 ≡ a}
                        {r : a0 ≡ a'}
                       → q ∙ p ≡ r
-                      → q ≡ r [ (\ x → a0 ≡ x) ↓ p ]
+                      → q ≡ r [ (λ x → a0 ≡ x) ↓ p ]
 PathOver-path-to {p = refl _} {q = refl _} (refl _) = reflo
 ```
 
@@ -233,12 +233,12 @@ a loop on the circle as indicated above:
 ```agda
   loop^ : ℤ → base ≡ base
   loop^ = ℤ-rec (refl _)
-                (improve (Isomorphism (\ p → p ∙ loop)
-                                      (Inverse (\ p → p ∙ (! loop))
-                                               (\ p → ! (∙assoc _ loop (! loop)) ∙
-                                                      ap (\ H → p ∙ H) (!-inv-r loop) )
-                                               (\ p → ! (∙assoc _ (! loop) loop) ∙
-                                                      ap (\ H → p ∙ H) (!-inv-l loop)))))
+                (improve (Isomorphism (λ p → p ∙ loop)
+                                      (Inverse (λ p → p ∙ (! loop))
+                                               (λ p → ! (∙assoc _ loop (! loop)) ∙
+                                                      ap (λ H → p ∙ H) (!-inv-r loop) )
+                                               (λ p → ! (∙assoc _ (! loop) loop) ∙
+                                                      ap (λ H → p ∙ H) (!-inv-l loop)))))
 ```
 
 But mapping loops to ints is harder.  The trick is to define a type
@@ -257,7 +257,7 @@ adds one:
 ```agda
   transport-Cover-loop : (x : ℤ) → transport Cover loop x ≡ fwd succℤ x
   transport-Cover-loop x = transport-ap-assoc Cover loop ∙
-                           ap (\ H → transport id H x) (S1-rec-loop _ _) ∙
+                           ap (λ H → transport id H x) (S1-rec-loop _ _) ∙
                            (uaβ  succℤ)
 
   PathOver-Cover-loop : (x : ℤ) → x ≡ fwd succℤ x [ Cover ↓ loop ]
@@ -277,7 +277,7 @@ For the other direction, we need to use S1-elim:
   decode : (x : S1) → Cover x → base ≡ x
   decode = S1-elim _
                    loop^
-                   (PathOver-→ (\ a →
+                   (PathOver-→ (λ a →
                     PathOver-path-to (! (ℤ-rec-succℤ _ _ a) ∙
                                       ! (ap loop^ (transport-Cover-loop _)))))
 ```
@@ -302,11 +302,11 @@ finish the final goal:
                → (f ∘ fwd succℤ) ∼ (fwd succℤ ∘ f)
                → f ∼ id
   endo-ℤ-is-id f f0 fsucc x = ℤ-rec-unique f 0ℤ succℤ f0 fsucc x ∙
-                           ! (ℤ-rec-unique (\ x → x) 0ℤ succℤ (refl _) (\ _ → refl _) x)  
+                           ! (ℤ-rec-unique (λ x → x) 0ℤ succℤ (refl _) (λ _ → refl _) x)
 
   transport-Cover-then-loop : {x : S1} (p : x ≡ base) (y : Cover x)
                             → transport Cover (p ∙ loop) y ≡ fwd succℤ (transport Cover p y)
-  transport-Cover-then-loop (refl _) y = ap (\ Z → transport Cover (Z) y) (∙unit-l loop) ∙
+  transport-Cover-then-loop (refl _) y = ap (λ Z → transport Cover (Z) y) (∙unit-l loop) ∙
                                          transport-Cover-loop _
   
   decode-encode-base : (x : ℤ) → encode base (loop^ x) ≡ x
@@ -315,17 +315,17 @@ finish the final goal:
     encode-loop^ x = encode base (loop^ x)
   
     encode-loop^-zero : encode-loop^ 0ℤ ≡ 0ℤ
-    encode-loop^-zero = ap (\ H → transport Cover H 0ℤ) (ℤ-rec-0ℤ _ _)
+    encode-loop^-zero = ap (λ H → transport Cover H 0ℤ) (ℤ-rec-0ℤ _ _)
   
     encode-loop^-succ : (encode-loop^ ∘ fwd succℤ) ∼ (fwd succℤ ∘ encode-loop^)
-    encode-loop^-succ x = ap (\ H → encode base H) (ℤ-rec-succℤ _ _ x) ∙
+    encode-loop^-succ x = ap (λ H → encode base H) (ℤ-rec-succℤ _ _ x) ∙
                           transport-Cover-then-loop (loop^ x) 0ℤ 
 
 
   decode-encode : (x : S1) (p : Cover x) → encode x (decode x p) ≡ p
   decode-encode = S1-elim _
                           decode-encode-base 
-                          (PathOver-Π \ aa' → fwd (transport-to-pathover _ _ _ _) (hSetℤ _ _ _ _)) 
+                          (PathOver-Π λ aa' → fwd (transport-to-pathover _ _ _ _) (hSetℤ _ _ _ _))
 ```
 
 Here's most of an implementation of integers:
@@ -338,7 +338,7 @@ module ImplementInts where
     → A ≃ B
   fix (Equivalence f (Inverse g fg g' fg')) =
     Equivalence f (Inverse g fg g
-                  (\x → ! (ap f (ap g (fg' x))) ∙ (ap f (fg (g' x)) ∙ fg' x)))
+                  (λ x → ! (ap f (ap g (fg' x))) ∙ (ap f (fg (g' x)) ∙ fg' x)))
 
   fwd-bwd : ∀ {l1 l2 : Level} {A : Type l1} {B : Type l2}
           → (e : A ≃ B) 
