@@ -236,7 +236,7 @@ a loop on the circle as indicated above:
                 (improve (Isomorphism (λ p → p ∙ loop)
                                       (Inverse (λ p → p ∙ (! loop))
                                                (λ p → ! (∙assoc _ loop (! loop)) ∙
-                                                      ap (λ H → p ∙ H) (!-inv-r loop) )
+                                                      ap (λ H → p ∙ H) (!-inv-r loop))
                                                (λ p → ! (∙assoc _ (! loop) loop) ∙
                                                       ap (λ H → p ∙ H) (!-inv-l loop)))))
 ```
@@ -306,7 +306,7 @@ finish the final goal:
 
   transport-Cover-then-loop : {x : S1} (p : x ≡ base) (y : Cover x)
                             → transport Cover (p ∙ loop) y ≡ fwd succℤ (transport Cover p y)
-  transport-Cover-then-loop (refl _) y = ap (λ Z → transport Cover (Z) y) (∙unit-l loop) ∙
+  transport-Cover-then-loop (refl _) y = ap (λ Z → transport Cover Z y) (∙unit-l loop) ∙
                                          transport-Cover-loop _
   
   decode-encode-base : (x : ℤ) → encode base (loop^ x) ≡ x
